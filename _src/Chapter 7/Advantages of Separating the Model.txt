@@ -1,0 +1,35 @@
+Advantages of Separating the Model
+
+<?php
+/**
+* This page lists all the books we have as an XML data structure
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+// Don't forget the include
+include('common.inc.php');
+// Set the content type to be XML
+header('Content-Type: application/xml');
+// Get the books list
+$books = Model::getBooksWithAuthors();
+// Echo XML declaration and open root element
+echo '<?xml version="1.0"?>', "\n";
+echo "<books>\n";
+// Now iterate over every book and display it
+while($b = $books->fetch())
+{
+?>
+<book id="<?=$b->id?>">
+<isbn><?=$b->isbn?></isbn>
+<title><?=htmlspecialchars($b->title)?></title>
+<publisher><?=htmlspecialchars($b->publisher)?></publisher>
+<summary><?=htmlspecialchars($b->summary)?></summary>
+<author>
+<id><?=$b->author?></id>
+<lastName><?=$b->lastName?></lastName>
+<firstName><?=$b->firstName?></firstName>
+</author>
+</book>
+<?
+}
+echo '</books>';

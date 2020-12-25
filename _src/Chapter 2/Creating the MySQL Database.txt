@@ -1,0 +1,75 @@
+Creating the MySQL Database
+
+mysql> create database pdo;
+Query OK, 1 row affected (0.05 sec)
+mysql> use pdo;
+Database changed
+mysql> create table books(
+-> id int primary key not null auto_increment,
+-> author int not null,
+-> title varchar(70) not null,
+-> isbn varchar(20),
+-> publisher varchar(30) not null,
+-> year int(4) not null,
+-> summary text(2048));
+Query OK, 0 rows affected (0.17 sec)
+mysql> create table authors(
+-> id int primary key not null auto_increment,
+-> firstName varchar(30) not null,
+-> lastName varchar(40) not null,
+-> bio text(2048));
+Query OK, 0 rows affected (0.00 sec)
+
+
+> sqlite3 pdo.db
+sqlite> create table books(
+...> id integer primary key,
+...> author integer(11) not null,
+...> title varchar(70) not null,
+...> isbn varchar(20),
+...> publisher varchar(30) not null,
+...> year integer(4) not null,
+...> summary text(2048));
+sqlite> create table authors(
+...> id integer(11) primary key,
+...> firstName varchar(30) not null,
+...> lastName varchar(40) not null,
+...> bio text(2048));
+
+
+mysql> insert into authors(firstName, lastName, bio) values(
+-> 'Marc', 'Delisle', 'Marc Delisle is a member of the MySQL
+Developers Guide');
+Query OK, 1 row affected (0.14 sec)
+mysql> insert into authors(firstName, lastName, bio) values(
+-> 'Sohail', 'Salehi', 'In recent years, Sohail has contributed
+to over 20 books, mainly in programming and computer graphics');
+Query OK, 1 row affected (0.00 sec)
+mysql> insert into authors(firstName, lastName, bio) values(
+-> 'Cameron', 'Cooper', 'J. Cameron Cooper has been playing
+around on the web since there was not much of a web with which to
+play around');
+Query OK, 1 row affected (0.00 sec)
+
+
+mysql> insert into books(author, title, isbn, publisher, year,
+summary) values(
+-> 1, 'Creating your MySQL Database: Practical Design Tips and
+Techniques', '1904811302', 'Packt Publishing Ltd', '2006',
+-> 'A short guide for everyone on how to structure your data and
+set-up your MySQL database tables efficiently and easily.');
+Query OK, 1 row affected (0.00 sec)
+mysql> insert into books(author, title, isbn, publisher, year,
+summary) values(
+-> 2, 'ImageMagick Tricks', '1904811868', 'Packt Publishing
+Ltd', '2006',
+-> 'Unleash the power of ImageMagick with this fast, friendly
+tutorial, and tips guide');
+Query OK, 1 row affected (0.02 sec)
+mysql> insert into books(author, title, isbn, publisher, year,
+summary) values(
+-> 3, 'Building Websites with Plone', '1904811027', 'Packt
+Publishing Ltd', '2004',
+-> 'An in-depth and comprehensive guide to the Plone content
+management system');
+Query OK, 1 row affected (0.00 sec)

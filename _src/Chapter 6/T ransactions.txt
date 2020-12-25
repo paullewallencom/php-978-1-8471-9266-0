@@ -1,0 +1,250 @@
+Transactions
+
+<table width="100%" border="1" cellpadding="3">
+<tr style="font-weight: bold">
+<td>Cover</td>
+<td>Author and Title</td>
+<td>ISBN</td>
+<td>Publisher</td>
+<td>Year</td>
+<td>Summary</td>
+<td>Copies</td>
+<td>Lend</td>
+<td>Edit</td>
+</tr>
+< ?php
+// Now iterate over every row and display it
+while($r = $q->fetch())
+{
+?>
+<tr>
+<td>
+<?php if($r['coverMime']) { ?>
+<img src="showCover.php?book=<?=$r['id']?>">
+<?php } else { ?>
+n/a
+<? } ?>
+</td>
+<td>
+<a href="author.php?id=<?=$r['authorId']?>"><?=htmlspecialchars
+("$r[firstName] $r[lastName]")?></a><br/>
+<b><?=htmlspecialchars($r['title'])?></b>
+</td>
+<td><?=htmlspecialchars($r['isbn'])?></td>
+<td><?=htmlspecialchars($r['publisher'])?></td>
+<td><?=htmlspecialchars($r['year'])?></td>
+<td><?=htmlspecialchars($r['summary'])?></td>
+<td><?=$r['copies']?></td>
+<td>
+<a href="lendBook.php?book=<?=$r['id']?>">Lend</a>
+</td>
+<td>
+<a href="editBook.php?book=<?=$r['id']?>">Edit</a>
+</td>
+</tr>
+<?php
+}
+? >
+
+
+
+sqlite> create table borrowers(
+...> id integer primary key,
+...> book int not null,
+...> name varchar(40),
+...> dt int);
+
+
+
+<?php
+/**
+* This page allows lending a book
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+// Don't forget the include
+include('common.inc.php');
+// First see if the request contains the book ID
+// Return back to books.php if not
+$id = (int)$_REQUEST['book'];
+if(!$id) {
+header("Location: books.php");
+exit;
+}
+// Now see if the form was submitted
+$warnings = array();
+if($_POST['submit']) {
+// Require that the borrower's name is entered
+if(!$_POST['name']) {
+$warnings[] = 'Please enter borrower\'s name';
+}
+else {
+// Form is OK, "lend" the book
+$conn->beginTransaction();
+try
+{
+$stmt = $conn->query("SELECT copies FROM books WHERE id=$id");
+$copies = $stmt->fetchColumn();
+$stmt->closeCursor();
+if($copies > 0) {
+// If we can lend it
+$conn->query("UPDATE books SET copies=copies-1
+WHEREid=$id");
+$stmt = $conn->prepare("INSERT INTO borrowers(book, name, dt)
+VALUES(?, ?, ?)");
+$stmt->execute(array($id, $_POST['name'], time()));
+}
+else {
+// Else show warning
+$warnings[] = 'There are no more copies of this book
+available';
+}
+$conn->commit();
+}
+catch(PDOException $e)
+{
+// Something bad happened
+// Roll back and rethrow the exception
+$conn->rollBack();
+throw $e;
+}
+}
+// Now, if we don't have errors,
+// redirect back to books.php
+if(count($warnings) == 0) {
+header("Location: books.php");
+exit;
+}
+// otherwise, the warnings will be displayed
+}
+// Display the header
+showHeader('Lend Book');
+// If we have any warnings, display them now
+if(count($warnings)) {
+echo "<b>Please correct these errors:</b><br>";
+foreach($warnings as $w)
+{
+echo "- ", htmlspecialchars($w), "<br>";
+}
+}
+// Now display the form
+?>
+<form action="lendBook.php" method="post">
+<input type="hidden" name="book" value="<?=$id?>">
+<b>Please enter borrower's name:<br></b>
+<input type="text" name="name"value="<?=htmlspecialchars
+($_POST['name'])?>">
+<input type="submit" name="submit" value=" Lend book ">
+</form>
+<?php
+// Display footer
+showFooter();
+
+
+
+<?php
+/**
+* This page lists all borrowed books
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+// Don't forget the include
+include('common.inc.php');
+// Display the header
+showHeader('Lended Books');
+// Get all lended books count and list
+$sql = "SELECT borrowers.*, books.title, authors.firstName,
+authors.lastName
+FROM borrowers, books, authors
+WHERE borrowers.book=books.id AND books.author=authors.id
+ORDER BY borrowers.dt";
+$totalBooks = getRowCount($sql);
+$q = $conn->query($sql);
+$q->setFetchMode(PDO::FETCH_ASSOC);
+// now create the table
+?>
+Total borrowed books: <?=$totalBooks?>
+<table width="100%" border="1" cellpadding="3">
+<tr style="font-weight: bold">
+<td>Title</td>
+<td>Author</td>
+<td>Borrowed by</td>
+<td>Borrowed on</td>
+<td>Return</td>
+</tr>
+<?php
+// Now iterate over every row and display it
+while($r = $q->fetch())
+{
+?>
+<tr>
+<td><?=htmlspecialchars($r['title'])?></td>
+<td><?=htmlspecialchars("$r[firstName] $r[lastName]")?></td>
+<td><?=htmlspecialchars($r['name'])?></td>
+<td><?=date('d M Y', $r['dt'])?></td>
+<td>
+<a href="returnBook.php?borrower=<?=$r['id']?>">Return</a>
+</td>
+</tr>
+<?php
+}
+?>
+</table>
+<?php
+// Display footer
+showFooter();
+
+
+
+function showHeader($title)
+{
+?>
+<html>
+<head><title><?=htmlspecialchars($title)?></title></head>
+<body>
+<h1><?=htmlspecialchars($title)?></h1>
+<a href="books.php">Books</a>
+<a href="authors.php">Authors</a>
+<a href="borrowers.php">Borrowers</a>
+<hr>
+<?php
+}
+
+
+<?php
+/**
+* This page "returns" a book back to the library
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+/ / Don't forget the include
+include('common.inc.php');
+// First see if the request contains the borrowers ID
+// Return back to books.php if not
+$id = (int)$_REQUEST['borrower'];
+if(!$id) {
+header("Location: books.php");
+exit;
+}
+// Now start the transaction
+$conn->beginTransaction();
+try
+{
+$q = $conn->query("SELECT book FROM borrowers WHERE id=$id");
+$book = (int)$q->fetchColumn();
+$q->closeCursor();
+$conn->query("DELETE FROM borrowers WHERE id=$id");
+$conn->query("UPDATE books SET copies=copies+1 WHERE id=$book");
+$conn->commit();
+header("Location: books.php");
+}
+catch(PDOException $e)
+{
+$conn->rollBack();
+throw $e;
+}
+
+
+
+
+

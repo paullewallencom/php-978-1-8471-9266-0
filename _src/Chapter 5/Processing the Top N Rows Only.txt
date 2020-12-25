@@ -1,0 +1,15 @@
+Processing the Top N Rows Only
+
+$q = $conn->query("SELECT * FROM authors ORDER BY lastName,
+firstName");
+$q->setFetchMode(PDO::FETCH_ASSOC);
+$count = 1;
+while(($r = $q->fetch()) && $count <= 5)
+{
+echo $r['lastName'], '<br>';
+$count++;
+}
+$q->closeCursor();
+$q = null;
+
+

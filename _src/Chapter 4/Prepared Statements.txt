@@ -1,0 +1,43 @@
+Prepared Statements
+
+$authors = array(
+array(
+'firstName' => 'Alexander',
+'lastName' => 'Dumas',
+
+
+'bio' => 'Alexandre Dumas was a French writer, best known for his
+numerous historical novels of high adventure which have
+made him one of the most widely read French authors in
+the world.'),
+array(
+'firstName' => 'Ivan',
+'lastName' => 'Franko',
+'bio' => 'Ivan Franko was a Ukrainian poet, writer, social and
+literary critic, and journalist. In addition to his own
+literary work, he translated the works of William
+Shakespeare, Lord Byron, Dante, Victor Hugo, Goethe and
+Schiller into the Ukrainian language.'));
+
+
+foreach($authors as $author)
+{
+$conn->query(
+'INSERT INTO authors(firstName, lastName, bio) VALUES(' .
+$conn->quote($author['firstName']) .
+',' . $conn->quote($author['lastName']) .
+',' . $conn->quote($author['bio'])')' .
+);
+}
+
+
+$stmt = $conn->prepare('INSERT INTO authors(firstName, lastName, bio)
+VALUES(?, ?, ?)');
+foreach($authors as $author)
+{
+$stmt->execute(
+array($author['firstName'], $author['lastName'],
+$author['bio']));
+}
+
+

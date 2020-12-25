@@ -1,0 +1,11 @@
+Retrieving Result Set Metadata
+
+$q = $conn->query("SELECT * FROM books ORDER BY title");
+$q->setFetchMode(PDO::FETCH_ASSOC);
+var_dump($q->rowCount());
+
+
+$q = $conn->query("SELECT authors.id AS authorId, firstName,
+lastName, books.* FROM authors, books WHERE
+author=authors.id ORDER BY title");
+var_dump($q->columnCount());

@@ -1,0 +1,14 @@
+
+Getting the List of Available Drivers
+
+
+var_dump(PDO::getAvailableDrivers());
+array(3)
+{
+[0]=>
+string(5) "mysql"
+[1]=>
+string(6) "sqlite"
+[2]=>
+string(7) "sqlite2"
+}

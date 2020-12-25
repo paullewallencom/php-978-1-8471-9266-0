@@ -1,0 +1,128 @@
+Designing Our Code
+
+<?php
+/**
+* This is a common include file
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+// DB connection string and username/password
+$connStr = 'mysql:host=localhost;dbname=pdo';
+$user = 'root';
+$pass = 'root';
+/**
+* This function will render the header on every page,
+* including the opening html tag,
+* the head section and the opening body tag.
+* It should be called before any output of the
+* page itself.
+* @param string $title the page title
+*/
+function showHeader($title)
+{
+?>
+<html>
+<head><title><?=htmlspecialchars($title)?></title></head>
+<body>
+<h1><?=htmlspecialchars($title)?></h1>
+<a href="books.php">Books</a>
+<a href="authors.php">Authors</a>
+<hr>
+<?php
+}
+/**
+* This function will 'close' the body and html
+* tags opened by the showHeader() function
+*/
+function showFooter()
+{
+?>
+</body>
+</html>
+<?php
+}
+// Create the connection object
+$conn = new PDO($connStr, $user, $pass);
+
+
+<?php
+/**
+* This page lists all the books we have
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+// Don't forget the include
+include('common.inc.php');
+// Issue the query
+$q = $conn->query("SELECT * FROM books ORDER BY title");
+// Display the header
+showHeader('Books');
+// now create the table
+?>
+<table width="100%" border="1" cellpadding="3">
+<tr style="font-weight: bold">
+<td>Title</td>
+<td>ISBN</td>
+<td>Publisher</td>
+<td>Year</td>
+<td>Summary</td>
+</tr>
+<?php
+// Now iterate over every row and display it
+while($r = $q->fetch(PDO::FETCH_ASSOC))
+{
+?>
+<tr>
+<td><?=htmlspecialchars($r['title'])?></td>
+<td><?=htmlspecialchars($r['isbn'])?></td>
+<td><?=htmlspecialchars($r['publisher'])?></td>
+<td><?=htmlspecialchars($r['year'])?></td>
+<td><?=htmlspecialchars($r['summary'])?></td>
+</tr>
+<?php
+}
+?>
+</table>
+<?php
+// Display footer
+showFooter();
+
+
+<?php
+/**
+* This page lists all the authors we have
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+// Don't forget the include
+include('common.inc.php');
+// Issue the query
+$q = $conn->query("SELECT * FROM authors ORDER BY lastName,
+firstName");
+// Display the header
+showHeader('Authors');
+// now create the table
+?>
+<table width="100%" border="1" cellpadding="3">
+<tr style="font-weight: bold">
+<td>First Name</td>
+<td>Last Name</td>
+<td>Bio</td>
+</tr>
+<?php
+// Now iterate over every row and display it
+while($r = $q->fetch(PDO::FETCH_ASSOC))
+{
+?>
+<tr>
+<td><?=htmlspecialchars($r['firstName'])?></td>
+<td><?=htmlspecialchars($r['lastName'])?></td>
+<td><?=htmlspecialchars($r['bio'])?></td>
+</tr>
+<?php
+}
+?>
+</table>
+<?php
+// Display footer
+showFooter();

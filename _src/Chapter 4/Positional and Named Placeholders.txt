@@ -1,0 +1,43 @@
+Positional and Named Placeholders
+
+$stmt = $conn->prepare(
+'INSERT INTO authors(firstName, lastName, bio) ' .
+'VALUES(:first, :last, :bio)');
+foreach($authors as $author)
+{
+$stmt->execute(
+array(
+':first' => $author['firstName'],
+':last' => $author['lastName'],
+':bio' => $author['bio'])
+);
+}
+
+
+foreach($authors as $author)
+{
+$stmt->execute(
+array(
+':bio' => $author['bio'],
+':last' => $author['lastName'],
+':first' => $author['firstName'])
+);
+}
+
+
+$stmt = $conn->prepare(
+'INSERT INTO authors(firstName, lastName, bio) VALUES(?, ?, ?)');
+foreach($authors as $author)
+{
+$stmt->execute(array_values($author));
+}
+
+
+$stmt = $conn->prepare("SELECT * FROM authors WHERE lastName
+LIKE '%?%'");
+$stmt->execute(array($_GET['name']));
+
+
+$stmt = $conn->prepare("SELECT * FROM authors WHERE lastName
+LIKE ?");
+$stmt->execute(array('%' . $_GET['name'] . '%'));

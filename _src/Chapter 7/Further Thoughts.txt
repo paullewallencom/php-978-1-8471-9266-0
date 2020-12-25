@@ -1,0 +1,16 @@
+Further Thoughts
+
+$conn = self::getConn();
+$conn->beginTransaction();
+try
+{
+$conn->query("INSERT INTO authors(bio) VALUES('')");
+$aid = $conn->lastInsertId();
+$author = self::getAuthor($aid);
+$author->update($firstName, $lastName, $bio);
+$conn->commit();
+}
+catch(Exception $e)
+{
+$conn->rollBack();
+}

@@ -1,0 +1,31 @@
+Setting and Getting Connection Attributes
+
+$conn->setAttribute(PDO::ATTR_CASE, PDO::CASE_UPPER);
+$stmt = $conn->query("SELECT * FROM authors LIMIT 1");
+$r = $stmt->fetch(PDO::FETCH_ASSOC);
+$stmt->closeCursor();
+var_dump($r);
+
+$conn->setAttribute(PDO::ATTR_ORACLE_NULLS, PDO::NULL_TO_STRING);
+$stmt = $conn->query("SELECT * FROM books WHERE coverImage IS
+NULL LIMIT 1");
+$r = $stmt->fetch(PDO::FETCH_ASSOC);
+$stmt->closeCursor();
+var_dump($r);
+
+
+function showFooter()
+{
+global $conn;
+if($conn instanceof PDO) {
+$driverName = $conn->getAttribute(PDO::ATTR_DRIVER_NAME);
+echo "<br/><br/>";
+echo "<small>Connecting using $driverName driver</small>";
+}
+?>
+</body>
+</html>
+<?php
+}
+
+

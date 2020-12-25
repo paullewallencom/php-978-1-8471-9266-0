@@ -1,0 +1,346 @@
+Modifying the Frontend to Use the Model
+
+<?php
+/**
+* This page lists all the books we have
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+// Don't forget the include
+include('common.inc.php');
+// Display the header
+showHeader('Books');
+// Get the books list
+$books = Model::getBooks();
+// now create the table
+?>
+Total books: <?=Model::getBookCount()?>
+<table width="100%" border="1" cellpadding="3">
+<tr style="font-weight: bold">
+<td>Cover</td>
+<td>Author and Title</td>
+<td>ISBN</td>
+<td>Publisher</td>
+<td>Year</td>
+<td>Summary</td>
+<td>Copies</td>
+<td>Lend</td>
+<td>Edit</td>
+</tr>
+<?php
+// Now iterate over every row and display it
+while($b = $books->fetch())
+{
+$a = $b->getAuthor();
+?>
+<tr>
+<td>
+<?php if($b->coverMime) { ?>
+<img src="showCover.php?book=<?=$b->id?>">
+<?php } else { ?>
+n/a
+<? } ?>
+</td>
+<td>
+<a href="author.php?id=<?=$a->id?>"><?=htmlspecialchars("$a
+>firstName $a->lastName")?></a><br/>
+<b><?=htmlspecialchars($b->title)?></b>
+</td>
+<td><?=htmlspecialchars($b->isbn)?></td>
+<td><?=htmlspecialchars($b->publisher)?></td>
+<td><?=htmlspecialchars($b->year)?></td>
+<td><?=htmlspecialchars($b->summary)?></td>
+<td><?=$b->copies?></td>
+<td>
+<a href="lendBook.php?book=<?=$b->id?>">Lend</a>
+</td>
+<td>
+<a href="editBook.php?book=<?=$b->id?>">Edit</a>
+</td>
+</tr>
+<?php
+}
+?>
+</table>
+<a href="editBook.php">Add book...</a>
+<?php
+// Display footer
+showFooter();
+
+
+
+/**
+* This method returns the list of all books with
+* author's first and last names
+* @return PDOStatement
+*/
+static function getBooksWithAuthors()
+{
+$sql = "SELECT books.*, authors.lastName, authors.firstName
+FROM books, authors
+WHERE books.author=authors.id
+ORDER BY title";
+$q = self::getConn()->query($sql);
+$q->setFetchMode(PDO::FETCH_CLASS, 'Book', array());
+return $q;
+}
+
+
+
+<?php
+/**
+* This page lists all the authors we have
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+// Don't forget the include
+include('common.inc.php');
+// Display the header
+showHeader('Authors');
+// Get number of authors and issue the query
+$authors = Model::getAuthors();
+// now create the table
+?>
+Total authors: <?=Model::getAuthorCount()?>
+<table width="100%" border="1" cellpadding="3">
+<tr style="font-weight: bold">
+<td>First Name</td>
+<td>Last Name</td>
+<td>Bio</td>
+<td>Edit</td>
+</tr>
+<?php
+// Now iterate over every row and display it
+while($a = $authors->fetch())
+{
+?>
+<tr>
+<td><?=htmlspecialchars($a->firstName)?></td>
+<td><?=htmlspecialchars($a->lastName)?></td>
+<td><?=htmlspecialchars($a->bio)?></td>
+<td>
+<a href="editAuthor.php?author=<?=$a->id?>">Edit</a>
+</td>
+</tr>
+<?php
+}
+?>
+</table>
+<a href="editAuthor.php">Add Author...</a>
+<?php
+// Display footer
+showFooter();
+
+
+
+<?php
+/**
+* This page shows an author's profile
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+// Don't forget the include
+include('common.inc.php');
+// Get the author
+$id = (int)$_REQUEST['id'];
+$author = Model::getAuthor($id);
+// Now see if the author is valid - if it's not,
+// we have an invalid ID
+if(!$author) {
+showHeader('Error');
+echo "Invalid Author ID supplied";
+showFooter();
+exit;
+}
+// Display the header - we have no error
+showHeader("Author: $author->firstName $author->lastName");
+// Now get the number and fetch all his books
+$books = $author->getBooks();
+$totalBooks = $author->getBookCount();
+// now display everything
+?>
+<h2>Author</h2>
+<table width="60%" border="1" cellpadding="3">
+<tr>
+<td><b>First Name</b></td>
+<td><?=htmlspecialchars($author->firstName)?></td>
+</tr>
+<tr>
+<td><b>Last Name</b></td>
+<td><?=htmlspecialchars($author->lastName)?></td>
+</tr>
+<tr>
+<td><b>Bio</b></td>
+<td><?=htmlspecialchars($author->bio)?></td>
+</tr>
+<tr>
+<td><b>Total books</td>
+<td><?=$totalBooks?></td>
+</tr>
+</table>
+<a href="editAuthor.php?author=<?=$author->id?>">Edit author...</a>
+<h2>Books</h2>
+<table width="100%" border="1" cellpadding="3">
+<tr style="font-weight: bold">
+<td>Title</td>
+<td>ISBN</td>
+<td>Publisher</td>
+<td>Year</td>
+<td>Summary</td>
+</tr>
+<?php
+// Now iterate over every book and display it
+while($b = $books->fetch())
+{
+?>
+<tr>
+<td><?=htmlspecialchars($b->title)?></td>
+<td><?=htmlspecialchars($b->isbn)?></td>
+<td><?=htmlspecialchars($b->publisher)?></td>
+<td><?=htmlspecialchars($b->year)?></td>
+<td><?=htmlspecialchars($b->summary)?></td>
+</tr>
+<?php
+}
+?>
+</table>
+<?php
+// Display footer
+showFooter();
+
+
+
+<?php
+/**
+* This page lists all borrowed books
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+// Don't forget the include
+include('common.inc.php');
+// Display the header
+showHeader('Lended Books');
+// Get all lended books list
+$brs = Model::getBorrowers();
+$totalBooks = Model::getBorrowerCount();
+// now create the table
+?>
+Total borrowed books: <?=$totalBooks?>
+<table width="100%" border="1" cellpadding="3">
+<tr style="font-weight: bold">
+<td>Title</td>
+<td>Author</td>
+<td>Borrowed by</td>
+<td>Borrowed on</td>
+<td>Return</td>
+</tr>
+<?php
+// Now iterate over every row and display it
+while($br = $brs->fetch())
+{
+$b = $br->getBook();
+$a = $b->getAuthor();
+?>
+<tr>
+<td><?=htmlspecialchars($b->title)?></td>
+<td><?=htmlspecialchars("$a->firstName $a->lastName")?></td>
+<td><?=htmlspecialchars($br->name)?></td>
+<td><?=date('d M Y', $br->dt)?></td>
+<td>
+<a href="returnBook.php?borrower=<?=$br->id?>">Return</a>
+</td>
+</tr>
+<?php
+}
+?>
+</table>
+<?php
+// Display footer
+showFooter();
+
+
+<?php
+/**
+* This page allows you to lend a book
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+// Don't forget the include
+include('common.inc.php');
+// First see if the request contains the book ID
+// Return to books.php if the ID invalid
+$id = (int)$_REQUEST['book'];
+$book = Model::getBook($id);
+if(!$book) {
+header("Location: books.php");
+exit;
+}
+// Now see if the form was submitted
+$warnings = array();
+if($_POST['submit']) {
+// Require that the borrower's name is entered
+if(!$_POST['name']) {
+$warnings[] = 'Please enter borrower\'s name';
+}
+else {
+// Form is OK, "lend" the book
+if(!$book->lend($_POST['name'])) {
+// Failure, show error message
+$warnings[] = 'There are no more copies of
+this book available';
+}
+}
+// Now, if we don't have errors,
+// redirect back to books.php
+if(count($warnings) == 0) {
+header("Location: books.php");
+exit;
+}
+// Otherwise, the warnings will be displayed
+}
+// Display the header
+showHeader('Lend Book');
+// If we have any warnings, display them now
+if(count($warnings)) {
+echo "<b>Please correct these errors:</b><br>";
+foreach($warnings as $w)
+{
+echo "- ", htmlspecialchars($w), "<br>";
+}
+}
+// Now display the form
+?>
+<form action="lendBook.php" method="post">
+<input type="hidden" name="book" value="<?=$id?>">
+<b>Please enter borrower's name:<br></b>
+<input type="text" name="name" value="<?=htmlspecialchars($_
+POST['name'])?>">
+<input type="submit" name="submit" value=" Lend book ">
+</form>
+<?php
+// Display footer
+showFooter();
+
+
+
+<?php
+/**
+* This page "returns" a book back to the library
+* PDO Library Management example application
+* @author Dennis Popel
+*/
+// Don't forget the include
+include('common.inc.php');
+// First see if the request contains the borrowers ID
+// Return to books.php if not
+$id = (int)$_REQUEST['borrower'];
+$borrower = Model::getBorrower($id);
+if(!$borrower) {
+header("Location: books.php");
+exit;
+}
+// Return the book and redirect to books.php
+// If anything happens, the exception will be
+// handled automatically
+$borrower->returnBook();
+header("Location: books.php");

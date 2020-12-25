@@ -1,0 +1,138 @@
+Prepared Statements and Bound Values
+
+$stmt = $conn->prepare(
+'INSERT INTO authors(firstName, lastName, bio) VALUES(?, ?, ?)');
+foreach($authors as $author)
+{
+$stmt->bindValue(1, $author['firstName']);
+$stmt->bindValue(2, $author['lastName']);
+$stmt->bindValue(3, $author['bio']);
+$stmt->execute();
+}
+
+
+$stmt = $conn->prepare(
+'INSERT INTO authors(firstName, lastName, bio) ' .
+'VALUES(:last, :first, :bio)');
+foreach($authors as $author)
+{
+$stmt->bindValue(':first', $author['firstName']);
+$stmt->bindValue(':last', $author['lastName']);
+$stmt->bindValue(':bio', $author['bio']);
+$stmt->execute();
+}
+
+
+$stmt = $conn->prepare('SELECT firstName, lastName FROM authors');
+$stmt->execute();
+$stmt->bindColumn(1, $first);
+$stmt->bindColumn(2, $last);
+while($stmt->fetch(PDO::FETCH_BOUND))
+{
+echo "$last, $first <br>";
+}
+
+
+if(@$book['id']) {
+$sql = "UPDATE books SET title=" . $conn->quote($_POST['title']) .
+', author=' . $conn->quote($_POST['author']) .
+', isbn=' . $conn->quote($_POST['isbn']) .
+', publisher=' . $conn->quote($_POST['publisher']) .
+', year=' . $conn->quote($_POST['year']) .
+', summary=' . $conn->quote($_POST['summary']) .
+" WHERE id=$book[id]";
+}
+else {
+$sql = "INSERT INTO books(title, author, isbn, publisher, year,
+summary) VALUES(" . $conn->quote($_POST['title']) .
+', ' . $conn->quote($_POST['author']) .
+', ' . $conn->quote($_POST['isbn']) .
+', ' . $conn->quote($_POST['publisher']) .
+', ' . $conn->quote($_POST['year']) .
+', ' . $conn->quote($_POST['summary']) .
+')';
+}
+// Now we are updating the DB.
+// We wrap this into a try/catch block
+// as an exception can get thrown if
+// the ISBN is already in the table.
+try
+{
+$conn->query($sql);
+// If we are here, then there is no error.
+// We can return back to books listing
+header("Location: books.php");
+exit;
+}
+catch(PDOException $e)
+{
+$warnings[] = 'Duplicate ISBN entered. Please correct';
+}
+
+
+if(@$book['id']) {
+$sql = "UPDATE books SET title=?, author=?, isbn=?, publisher=?
+year=?, summary=? WHERE id=$book[id]";
+}
+else {
+$sql = "INSERT INTO books(title, author, isbn, publisher, year,
+summary) VALUES(?, ?, ?, ?, ?, ?)";
+}
+$stmt = $conn->prepare($sql);
+// Now we are updating the DB.
+// We wrap this into a try/catch block
+// as an exception can get thrown if
+// the ISBN is already in the table.
+try
+{
+$stmt->execute(array($_POST['title'], $_POST['author'],
+$_POST['isbn'], $_POST['publisher'], $_POST['year'],
+$_POST['summary']));
+// If we are here, then there is no error.
+// We can return back to books listing.
+header("Location: books.php");
+exit;
+}
+catch(PDOException $e)
+{
+$warnings[] = 'Duplicate ISBN entered. Please correct';
+}
+
+
+if(@$author['id']) {
+$sql = "UPDATE authors SET firstName=" .
+$conn->quote($_POST['firstName']) .
+', lastName=' . $conn->quote($_POST['lastName']) .
+', bio=' . $conn->quote($_POST['bio']) .
+" WHERE id=$author[id]";
+}
+else {
+$sql = "INSERT INTO authors(firstName, lastName, bio) VALUES(" .
+$conn->quote($_POST['firstName']) .
+', ' . $conn->quote($_POST['lastName']) .
+', ' . $conn->quote($_POST['bio']) .
+')';
+}
+$conn->query($sql);
+header("Location: authors.php");
+exit;
+
+
+if(@$author['id']) {
+$sql = "UPDATE authors SET firstName=?, lastName=?, bio=?
+WHERE id=$author[id]";
+}
+else {
+$sql = "INSERT INTO authors(firstName, lastName, bio)
+VALUES(?, ?, ?)";
+}
+$stmt = $conn->prepare($sql);
+$stmt->execute(array($_POST['firstName'], $_POST['lastName'],
+$_POST['bio']));
+header("Location: authors.php");
+exit;
+
+
+
+
+

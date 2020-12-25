@@ -1,0 +1,30 @@
+Starting at an Arbitrary Offset
+
+$q = $conn->query("SELECT * FROM authors ORDER BY lastName,
+firstName");
+$q->setFetchMode(PDO::FETCH_ASSOC);
+$count = 1;
+while(($r = $q->fetch()) && $count <= 5)
+{
+$count++;
+}
+$count = 1;
+while(($r = $q->fetch()) && $count <= 5)
+{
+echo $r['lastName'], '<br>';
+$count++;
+}
+$q->closeCursor();
+$q = null;
+
+
+$stmt = $conn->query("SELECT * FROM authors ORDER BY lastName,
+firstName");
+$page = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$page = array_slice($page, 5, 5);
+foreach($page as $r)
+{
+echo $r['lastName'], '<br>';
+}
+
+

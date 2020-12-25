@@ -1,0 +1,31 @@
+Error Handling
+// For SQLite:
+$dbh = sqlite_open('/path/to/cars.ldb', 0666) or die
+('Error opening SQLite database: ' .
+sqlite_error_string(sqlite_last_error($dbh)));
+$q = sqlite_query("SELECT DISTINCT make FROM cars ORDER BY make",
+$dbh) or die('Could not execute query because: ' .
+sqlite_error_string(sqlite_last_error($dbh)));
+
+
+
+// PDO error handling
+// Assume the connection string is one of the following:
+// $connStr = 'mysql:host=localhost;dbname=cars'
+// $connStr = 'sqlite:/path/to/cars.ldb';
+// $connStr = 'pgsql:host=localhost dbname=cars';
+try
+{
+$conn = new PDO($connStr, 'boss', 'password');
+}
+catch(PDOException $pe)
+{
+die('Could not connect to the database because: ' .
+$pe->getMessage();
+}
+$q = $conn->query("SELECT DISTINCT make FROM cars ORDER BY make");
+if(!$q)
+{
+$ei = $conn->errorInfo();
+die('Could not execute query because: ' . $ei[2]);
+}

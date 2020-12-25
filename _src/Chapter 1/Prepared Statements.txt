@@ -1,0 +1,60 @@
+// Suppose the years come in the startYear and endYear
+// request variables:
+$sy = (int)$_REQUEST['startYear'];
+$ey = (int)$_REQUEST['endYear'];
+if($ey < $sy)
+{
+// ensure $sy is less than $ey
+$tmp = $ey;
+$ey = $sy;
+$sy = $tmp;
+}
+$sql = "SELECT * FROM cars WHERE year >= $sy AND year <= $ey";
+// send the query in $sql…
+
+// Assuming we have already connected and prepared
+// the $sy and $ey variables
+$sql = 'SELECT * FROM cars WHERE year >= ? AND year <= ?';
+$stmt = $conn->prepare($sql);
+$stmt->execute(array($sy, $ey));
+
+// Suppose the years come in the startYear and endYear
+// request variables:
+$sy = (int)$_REQUEST['startYear'];
+$ey = (int)$_REQUEST['endYear'];
+if($ey < $sy)
+{
+// ensure $sy is less than $ey
+$tmp = $ey;
+$ey = $sy;
+$sy = $tmp;
+}
+$sql = 'SELECT * FROM cars WHERE year >= ? AND year <= ?';
+$stmt = $conn->prepare($sql);
+$stmt->execute(array($sy, $ey));
+// now iterate over the result as if we obtained
+// the $stmt in a call to PDO::query()
+while($r = $stmt->fetch(PDO::FETCH_ASSOC))
+{
+echo "$r[make] $r[model] $r[year]\n";
+}
+
+$sql = 'SELECT * FROM cars WHERE year >= ? AND year <= ?';
+$stmt = $conn->prepare($sql);
+// Fetch the 'new' cars:
+$stmt->execute(array(2005, 2007));
+$newCars = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// now, 'older' cars:
+$stmt->execute(array(2000, 2004));
+$olderCars = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Show them
+echo 'We have ', count($newCars), ' cars dated 2005-2007';
+print_r($newCars);
+echo 'Also we have ', count($olderCars), ' cars dated 2000-2004';
+print_r($olderCars);
+
+// Assume we also want to filter by make
+$sql = 'SELECT * FROM cars WHERE make=?';
+$stmt = $conn->prepare($sql);
+$stmt->execute(array($_REQUEST['make']));
+
